@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -25,7 +27,20 @@ func main() {
 	}
 
 	log.Printf("Status: %s", resp.Status)
-	log.Printf("Body: %s", resp.Body)
+	// Read the response body
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	// Unmarshal the JSON
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, bodyBytes, "", "  "); err != nil {
+		panic(err)
+	}
+
+	// Print the formatted JSON
+	log.Printf("Body: %s", prettyJSON.String())
 
 	defer resp.Body.Close()
 }
